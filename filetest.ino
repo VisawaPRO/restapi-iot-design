@@ -8,7 +8,7 @@ const char* password = "12345678";        // รหัสผ่าน Wi-Fi
 
 // Configuration for API
 const char* siteID = "KMb827eb3fe41f";    // Site ID
-const int deviceID = 1;                   // Device ID
+const int deviceID = 2;                   // Device ID
 const char* BEARIOT_IP = "172.20.10.2";   // IP ของ BeaRiOT
 const int BEARIOT_PORT = 3300;            // Port ของ BeaRiOT
 String API_ENDPOINT = "http://" + String(BEARIOT_IP) + ":" + String(BEARIOT_PORT) + "/api/interfaces/update";
