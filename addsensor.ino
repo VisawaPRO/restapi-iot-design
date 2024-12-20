@@ -3,21 +3,22 @@
 #include <ArduinoJson.h>
 
 // Wi-Fi credentials
-const char* ssid = "Jangnubburengnong";        // ชื่อ Wi-Fi
-const char* password = "12345678";            // รหัสผ่าน Wi-Fi
+const char* ssid = "VisawaHouse_2.4G";        // ชื่อ Wi-Fi
+const char* password = "mag0859603510";       // รหัสผ่าน Wi-Fi
 
 // Configuration for API
 const char* siteID = "KMb827eb3fe41f";        // Site ID
-const int deviceID = 2;                       // Device ID
-const char* BEARIOT_IP = "172.20.10.2";       // IP ของ BeaRiOT
+const int deviceID = 4;                       // Device ID
+const char* BEARIOT_IP = "192.168.1.34";      // IP ของ BeaRiOT
 const int BEARIOT_PORT = 3300;                // Port ของ BeaRiOT
 String API_ENDPOINT = "http://" + String(BEARIOT_IP) + ":" + String(BEARIOT_PORT) + "/api/interfaces/update";
 
 // LDR Pin
-const int LDR_PIN = 4;  // ขา GPIO ที่อ่านค่าจาก LDR Module (Analog Output)
+const int LDR_PIN = 34;  // ขา GPIO ที่อ่านค่าจาก LDR Module (Analog Output)
 
 // Global variable for sensor value
 int ldrValue = 0;       // เก็บค่า ADC ที่อ่านจากเซ็นเซอร์
+int adjustedLdrValue = 0; // เก็บค่าที่ปรับแล้ว (แสงมากค่าสูง)
 
 // Function to connect to Wi-Fi
 void connectWiFi() {
@@ -58,13 +59,14 @@ String generatePayload(int value) {
   return payload;
 }
 
-// Function to read LDR value
+// Function to read and adjust LDR value
 void readLDR() {
-  ldrValue = analogRead(LDR_PIN);  // อ่านค่า ADC
+  ldrValue = analogRead(LDR_PIN);             // อ่านค่า ADC
+  adjustedLdrValue = 4095 - ldrValue;        // ปรับค่า (แสงมากค่าสูง แสงน้อยค่าต่ำ)
   
-  // แสดงค่า ADC ใน Serial Monitor
-  Serial.print("LDR Value (Analog): ");
-  Serial.println(ldrValue);
+  // แสดงค่าผ่าน Serial Monitor
+  Serial.print(" | Adjusted Value (Light Intensity): ");
+  Serial.println(adjustedLdrValue);
 }
 
 // Function to send HTTP POST request
@@ -100,9 +102,9 @@ void setup() {
 void loop() {
   // อ่านค่า LDR และส่งข้อมูลใน loop
   readLDR();
-  if (ldrValue >= 0 && ldrValue <= 4095) {    // ตรวจสอบค่าที่ได้ให้อยู่ในช่วงปกติ
-    String payload = generatePayload(ldrValue); // สร้าง JSON payload
-    sendData(payload);                        // ส่งข้อมูลไปยัง API
+  if (adjustedLdrValue >= 0 && adjustedLdrValue <= 4095) { // ตรวจสอบค่าที่ปรับแล้วให้อยู่ในช่วงปกติ
+    String payload = generatePayload(adjustedLdrValue);    // สร้าง JSON payload
+    sendData(payload);                                    // ส่งข้อมูลไปยัง API
   } else {
     Serial.println("Error: Invalid LDR value");
   }
